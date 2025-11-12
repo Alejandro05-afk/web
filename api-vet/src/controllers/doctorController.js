@@ -89,10 +89,54 @@ const crearNuevoPassword = async (req,res)=>{
 
 };
 
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validar campos vacíos
+    if (Object.values(req.body).includes(""))
+      return res.status(400).json({ msg: "Debes llenar todos los campos" });
+
+    // Buscar doctor por email
+    const doctorBDD = await Doctor.findOne({ email });
+    if (!doctorBDD)
+      return res.status(404).json({ msg: "El usuario no se encuentra registrado" });
+
+    // Validar confirmación de correo
+    if (!doctorBDD.confirmEmail)
+      return res.status(403).json({ msg: "Debes verificar tu cuenta antes de iniciar sesión" });
+
+    // Verificar contraseña
+    const verificarPassword = await doctorBDD.matchPassword(password);
+    if (!verificarPassword)
+      return res.status(401).json({ msg: "El password no es correcto" });
+
+    // Extraer datos a enviar
+    const { nombre, apellido, direccion, telefono, _id, rol, email: correo } = doctorBDD;
+
+    // Respuesta final
+    return res.status(200).json({
+      nombre,
+      apellido,
+      direccion,
+      telefono,
+      _id,
+      rol,
+      correo,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: `Error en el servidor - ${error.message}` });
+  }
+};
+
+
 export {
     registro,
     confirmarMail,
     recuperarPassword,
     comprobarTokenPasword,
-    crearNuevoPassword
+    crearNuevoPassword,
+    login
 }
