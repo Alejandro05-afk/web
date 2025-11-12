@@ -2,8 +2,6 @@ import sendMail from "../config/nodemailer.js"
 
 
 const sendMailToRegister = (userMail, token) => {
-   
-    
 
     return sendMail(
         userMail,
@@ -20,7 +18,25 @@ const sendMailToRegister = (userMail, token) => {
     )
 }
 
+const sendMailToRecoverPassword = (userMail, token) =>{
+    
+     return sendMail(
+        userMail,
+        "Recupera tu contraseña",
+        `
+            <h1>SMARTVET - 🐶 😺</h1>
+            <p>Has solicitado restablecer tu contraseña.</p>
+            <a href="${process.env.URL_BACKEND}recuperarpassword/${token}">
+            Clic para restablecer tu contraseña
+            </a>
+            <hr>
+            <footer>El equipo de SMARTVET te da la más cordial bienvenida.</footer>
+        `
+    )
+}
+
 
 export {
-    sendMailToRegister
+    sendMailToRegister,
+    sendMailToRecoverPassword
 }

@@ -1,4 +1,4 @@
-import { sendMailToRegister } from "../helpers/sendMail.js"
+import { sendMailToRegister , sendMailToRecoverPassword} from "../helpers/sendMail.js"
 import Doctor from "../models/Doctor.js"
 
 const registro = async (req,res)=>{
@@ -31,7 +31,7 @@ const confirmarMail = async(req,res) => {
 
     const validarEmailBDD = await Doctor.findOne({ token })
 
-    if (!validarEmailBDD) return res.status(404).json({ msg: "Token ivalido o cuenta ya confirmada"})
+    if (!validarEmailBDD) return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada"})
 
     validarEmailBDD.token = null
     validarEmailBDD.confirmEmail = true
@@ -40,8 +40,59 @@ const confirmarMail = async(req,res) => {
     res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesion"})
 }
 
+const recuperarPassword = async (req,res)=>{
+  try {
+    const { email } = req.body
+        if (!email) return res.status(400).json({ msg: "Debes ingresar un correo electrónico" })
+        const doctorBDD = await Doctor.findOne({ email })
+        if (!doctorBDD) return res.status(404).json({ msg: "El usuario no se encuentra registrado" })
+        const token = doctorBDD.createToken()
+        doctorBDD.token = token
+        await sendMailToRecoverPassword(email, token)
+        await doctorBDD.save()
+        res.status(200).json({ msg: "Revisa tu correo electrónico para reestablecer tu cuenta" })
+  } catch (error){
+    res.status(500).json({msg: `Error en el servidor - ${error}`})
+}
+};
+
+const comprobarTokenPasword = async (req,res)=>{
+  try {
+    const {token} = req.params
+        const doctorBDD = await Doctor.findOne({token})
+        if(doctorBDD?.token !== token) return res.status(404).json({msg:"Lo sentimos, no se puede validar la cuenta"})
+        res.status(200).json({msg:"Token confirmado, ya puedes crear tu nuevo password"})
+  } catch (error){
+    res.status(500).json({msg: `Error en el servidor - ${error}`})
+}
+};
+
+const crearNuevoPassword = async (req,res)=>{
+  try {
+    const {token} = req.params
+    const {password,confirmPassword}=req.body
+
+    if (Object.values(req.body).includes("")) return res.status(404).json({msg: "Debes llenar todos los campos"})
+    if (password !== confirmPassword) return res.status(404).json({msg: "Los passwords no coinciden"})
+    const doctorBDD = await Doctor.findOne({token})
+    if(!doctorBDD) return res.status(400).json({msg: "No se puede validar la cuenta"})
+
+
+    doctorBDD.password = await doctorBDD.encrypyPassword(password)
+    doctorBDD.token = null
+    await doctorBDD.save()
+
+    res.status(200).json({msg: "Felicictaciones, ya puedes iniciar sesion con tu nuevo password"})
+  } catch (error){
+    res.status(500).json({msg: `Error en el servidor - ${error}`})
+}
+
+};
 
 export {
     registro,
-    confirmarMail
+    confirmarMail,
+    recuperarPassword,
+    comprobarTokenPasword,
+    crearNuevoPassword
 }
