@@ -1,5 +1,7 @@
 import { sendMailToRegister , sendMailToRecoverPassword} from "../helpers/sendMail.js"
+import { createTokenJWT } from "../middlewares/JWT.js"
 import Doctor from "../models/Doctor.js"
+
 
 const registro = async (req,res)=>{
     try{
@@ -108,28 +110,29 @@ const login = async (req, res) => {
 
     // Verificar contraseña
     const verificarPassword = await doctorBDD.matchPassword(password);
-    if (!verificarPassword)
-      return res.status(401).json({ msg: "El password no es correcto" });
+    if(!verificarPassword) return res.status(404).json({msg:"Lo sentimos, el password no es el correcto"})
+		const {nombre,apellido,direccion,telefono,_id} = doctorBDD
+		const token = createTokenJWT(doctorBDD._id,doctorBDD.rol)
 
-    // Extraer datos a enviar
-    const { nombre, apellido, direccion, telefono, _id, rol, email: correo } = doctorBDD;
-
-    // Respuesta final
-    return res.status(200).json({
-      nombre,
-      apellido,
-      direccion,
-      telefono,
-      _id,
-      rol,
-      correo,
-    });
+    res.status(200).json({
+        token,
+        nombre,
+        apellido,
+        direccion,
+        telefono,
+        _id,
+        email:doctorBDD.email
+    })
 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: `Error en el servidor - ${error.message}` });
   }
 };
+
+const perfil =(req,res)=>{
+	res.send("Perfil del usuario")
+}
 
 
 export {
@@ -138,5 +141,8 @@ export {
     recuperarPassword,
     comprobarTokenPasword,
     crearNuevoPassword,
-    login
-}
+    login,
+    perfil
+} 
+
+
