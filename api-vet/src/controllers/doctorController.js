@@ -111,13 +111,14 @@ const login = async (req, res) => {
     // Verificar contraseña
     const verificarPassword = await doctorBDD.matchPassword(password);
     if(!verificarPassword) return res.status(404).json({msg:"Lo sentimos, el password no es el correcto"})
-		const {nombre,apellido,direccion,telefono,_id} = doctorBDD
+		const {nombre,apellido,rol,direccion,telefono,_id} = doctorBDD
 		const token = createTokenJWT(doctorBDD._id,doctorBDD.rol)
 
     res.status(200).json({
         token,
         nombre,
         apellido,
+        rol,
         direccion,
         telefono,
         _id,
@@ -131,9 +132,17 @@ const login = async (req, res) => {
 };
 
 const perfil =(req,res)=>{
-	res.send("Perfil del usuario")
+	const {token,rol,confirmEmail,createdAt,updatedAt,__v,...datosPerfil} = req.doctorHeader
+    res.status(200).json(datosPerfil)
 }
 
+const actualizarPassword = (req,res) =>{
+  try {
+    
+  } catch (error) {
+    res.status(500).json({msg : `Error en el servidor - ${error}`})
+  }
+}
 
 export {
     registro,
@@ -142,7 +151,8 @@ export {
     comprobarTokenPasword,
     crearNuevoPassword,
     login,
-    perfil
+    perfil,
+    actualizarPassword
 } 
 
 
