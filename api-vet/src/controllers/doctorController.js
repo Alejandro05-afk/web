@@ -136,9 +136,44 @@ const perfil =(req,res)=>{
     res.status(200).json(datosPerfil)
 }
 
-const actualizarPassword = (req,res) =>{
+const actualizarPassword = async(req,res) =>{
   try {
+    const {passwordActual, passwordNuevo} = req.body
+    const {_id} = req.doctorHeader
+
+    const doctorBDD = await Doctor.findById(_id)
+    if(!doctorBDD) return res.status(404).json({msg:`Lo sentimos no existe odontologo ${id}`})
     
+    const verificarPassword = await doctorBDD.matchPassword(passwordActual)
+    if(!verificarPassword) res.status(404).json({msg: "Lo sentimos el password actual no es el correcto"})
+
+    
+    doctorBDD.password = await doctorBDD.encrypyPassword(passwordNuevo)
+    await doctorBDD.save()
+
+    res.status(200).json({msg: "Password actualizado correctamente"})
+  } catch (error) {
+    res.status(500).json({msg : `Error en el servidor - ${error}`})
+  }
+}
+
+const actualizarDatos = async(req,res) =>{
+  try {
+    const {nombre, apellido, direccion, celular, email} = req.body
+    const {_id} = req.doctorHeader
+
+    const doctorBDD = await Doctor.findById(_id)
+    if(!doctorBDD) return res.status(404).json({msg:`Lo sentimos no existe odontologo ${_id}`})
+      
+      doctorBDD.nombre = nombre || doctorBDD.nombre
+      doctorBDD.apellido = apellido || doctorBDD.apellido
+      doctorBDD.direccion = direccion || doctorBDD.direccion
+      doctorBDD.celular = celular || doctorBDD.celular
+      doctorBDD.email = email || doctorBDD.email
+    
+    await doctorBDD.save()
+    res.status(200).json({msg: "Datos actualizados correctamente"}) 
+
   } catch (error) {
     res.status(500).json({msg : `Error en el servidor - ${error}`})
   }
@@ -152,7 +187,8 @@ export {
     crearNuevoPassword,
     login,
     perfil,
-    actualizarPassword
+    actualizarPassword,
+    actualizarDatos
 } 
 
 
