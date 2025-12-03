@@ -35,8 +35,25 @@ const sendMailToRecoverPassword = (userMail, token) =>{
         )
 }
 
+const sendMailToOwner = (userMail, token) => {
+
+    return sendMail(
+        userMail,
+        "Bienvenido - Propietario de la mascota 🐾",
+            `
+                <h1>SMARTVET - 🐶 😺</h1>
+                <p>Bienvenido a SMARTVET, estas son tus credenciales de acceso:</p>
+                <p><strong>Contraseña:</strong> ${password}</p>
+                <a href="${process.env.URL_BACKEND}login">Iniciar sesión</a>
+                <hr>
+                <footer>El equipo de SMARTVET te da la más cordial bienvenida.</footer>
+            `
+    )
+}
+
 
 export {
     sendMailToRegister,
-    sendMailToRecoverPassword
+    sendMailToRecoverPassword,
+    sendMailToOwner
 }
