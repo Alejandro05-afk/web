@@ -35,7 +35,7 @@ const sendMailToRecoverPassword = (userMail, token) =>{
         )
 }
 
-const sendMailToOwner = (userMail, token) => {
+const sendMailToOwner = (userMail, password) => {
 
     return sendMail(
         userMail,

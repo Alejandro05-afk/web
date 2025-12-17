@@ -7,6 +7,7 @@ import Paciente from "../models/Paciente.js";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from 'cloudinary'
 import fs from "fs-extra"
+import { createTokenJWT } from "../middlewares/JWT.js";
 
 
 const registrarPaciente = async(req,res) =>{
@@ -18,12 +19,17 @@ const registrarPaciente = async(req,res) =>{
         const emailExistente = await Paciente.findOne({emailPropietario})
         if(emailExistente) return res.status(400).json({msg: "El email ya se encuentra registrado"})
 
+        
         const password = Math.random().toString(36).toUpperCase().slice(2, 5)
+   
+        
         const nuevoPaciente = new Paciente({
             ...req.body,
             passwordPropietario: await Paciente.prototype.encryptPassword("VET"+password),
             doctor: req.doctorHeader._id
         })
+        console.log(nuevoPaciente);
+        
         if (req.files?.imagen) {
             const { secure_url, public_id } = await subirImagenCloudinary(req.files.imagen.tempFilePath)
             nuevoPaciente.avatarMascota = secure_url
@@ -36,10 +42,15 @@ const registrarPaciente = async(req,res) =>{
         }
 
         await nuevoPaciente.save()
+
+        
+        
         await sendMailToOwner(emailPropietario,"VET"+password)
         res.status(201).json({ msg: "Registro exitoso de la mascota y correo enviado al propietario" })
 
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({msg: `Error en el servidor - ${error}`})
     }
 }
@@ -111,7 +122,8 @@ const loginPropietario = async(req,res)=>{
         if(!propietarioBDD) return res.status(404).json({msg:"El propietario no se encuentra registrado"})
         const verificarPassword = await propietarioBDD.matchPassword(passwordPropietario)
         if(!verificarPassword) return res.status(404).json({msg:"El password no es el correcto"})
-        const token = crearTokenJWT(propietarioBDD._id,propietarioBDD.rol)
+        const token = createTokenJWT(propietarioBDD._id,propietarioBDD.rol)
+        
         const {_id,rol} = propietarioBDD
         res.status(200).json({
             token,

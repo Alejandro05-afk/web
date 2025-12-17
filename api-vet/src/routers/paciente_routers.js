@@ -8,9 +8,7 @@ const router = Router()
 
 router.post('/paciente/login',loginPropietario)
 
-
-
-router.post("/paciente/registro",verificarTokenJWT, registrarPaciente)
+router.post("/paciente/registro", registrarPaciente)
 router.get("/pacientes",verificarTokenJWT,listarPacientes)
 router.get("/paciente/:id",verificarTokenJWT, detallePaciente)
 router.delete("/paciente/eliminar/:id", verificarTokenJWT,eliminarPaciente)
