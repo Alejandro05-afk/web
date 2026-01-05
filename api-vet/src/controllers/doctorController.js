@@ -1,5 +1,5 @@
 import { sendMailToRegister , sendMailToRecoverPassword} from "../helpers/sendMail.js"
-import { createTokenJWT } from "../middlewares/JWT.js"
+import { crearTokenJWT } from "../middlewares/JWT.js"
 import Doctor from "../models/Doctor.js"
 
 
@@ -112,7 +112,7 @@ const login = async (req, res) => {
     const verificarPassword = await doctorBDD.matchPassword(password);
     if(!verificarPassword) return res.status(404).json({msg:"Lo sentimos, el password no es el correcto"})
 		const {nombre,apellido,rol,direccion,telefono,_id} = doctorBDD
-		const token = createTokenJWT(doctorBDD._id,doctorBDD.rol)
+		const token = crearTokenJWT(doctorBDD._id,doctorBDD.rol)
 
     res.status(200).json({
         token,

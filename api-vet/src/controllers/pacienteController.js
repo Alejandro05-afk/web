@@ -7,29 +7,28 @@ import Paciente from "../models/Paciente.js";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from 'cloudinary'
 import fs from "fs-extra"
-import { createTokenJWT } from "../middlewares/JWT.js";
+import { crearTokenJWT } from "../middlewares/JWT.js";
 
 
-const registrarPaciente = async(req,res) =>{
+const registrarPaciente = async(req,res)=>{
+
     try {
         const {emailPropietario} = req.body
 
-        if (Object.values(req.body).includes("")) return res.status(400).json({msg: "Debes llenar todos los campos"})
+        if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Debes llenar todos los campos"})
 
         const emailExistente = await Paciente.findOne({emailPropietario})
-        if(emailExistente) return res.status(400).json({msg: "El email ya se encuentra registrado"})
+        
+        if(emailExistente) return res.status(400).json({msg:"El email ya se encuentra registrado"})
 
-        
         const password = Math.random().toString(36).toUpperCase().slice(2, 5)
-   
-        
+
         const nuevoPaciente = new Paciente({
             ...req.body,
             passwordPropietario: await Paciente.prototype.encryptPassword("VET"+password),
             doctor: req.doctorHeader._id
         })
-        console.log(nuevoPaciente);
-        
+
         if (req.files?.imagen) {
             const { secure_url, public_id } = await subirImagenCloudinary(req.files.imagen.tempFilePath)
             nuevoPaciente.avatarMascota = secure_url
@@ -42,21 +41,22 @@ const registrarPaciente = async(req,res) =>{
         }
 
         await nuevoPaciente.save()
-
-        
-        
+    
         await sendMailToOwner(emailPropietario,"VET"+password)
         res.status(201).json({ msg: "Registro exitoso de la mascota y correo enviado al propietario" })
 
     } catch (error) {
-        console.log(error);
-        
-        res.status(500).json({msg: `Error en el servidor - ${error}`})
+        console.error(error)
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
+
+
 const listarPacientes = async (req,res)=>{
     try {
-        const pacientes = await Paciente.find({ estadoMascota: true, doctor: req.doctorHeader._id }).select("-salida -createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
+        console.log("Doctor JWT:", req.doctorHeader._id);
+
+        const pacientes = await Paciente.find({ estadoMascota: true, doctor: req.doctorHeader._id }).select("-nuevoPaciente -createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
         res.status(200).json(pacientes)
 
     } catch (error) {
@@ -64,6 +64,7 @@ const listarPacientes = async (req,res)=>{
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
+
 
 const detallePaciente = async(req,res)=>{
 
@@ -122,8 +123,7 @@ const loginPropietario = async(req,res)=>{
         if(!propietarioBDD) return res.status(404).json({msg:"El propietario no se encuentra registrado"})
         const verificarPassword = await propietarioBDD.matchPassword(passwordPropietario)
         if(!verificarPassword) return res.status(404).json({msg:"El password no es el correcto"})
-        const token = createTokenJWT(propietarioBDD._id,propietarioBDD.rol)
-        
+        const token = crearTokenJWT(propietarioBDD._id,propietarioBDD.rol)
         const {_id,rol} = propietarioBDD
         res.status(200).json({
             token,

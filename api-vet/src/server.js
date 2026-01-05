@@ -9,6 +9,7 @@ import routerDoctor from './routers/doctor_routes.js';
 import routerPacientes from './routers/paciente_routers.js';
 
 
+
 // Inicializaciones
 const app = express()
 dotenv.config()

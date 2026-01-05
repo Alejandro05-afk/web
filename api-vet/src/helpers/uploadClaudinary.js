@@ -11,6 +11,8 @@ const subirImagenCloudinary = async (filePath, folder = "Pacientes") => {
 
 }
 
+
+
 // Subir Base64 a Cloudinary
 const subirBase64Cloudinary = async (base64, folder = "Pacientes") => {
 
