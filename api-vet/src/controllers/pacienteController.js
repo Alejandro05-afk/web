@@ -53,11 +53,16 @@ const registrarPaciente = async(req,res)=>{
 
 
 const listarPacientes = async (req,res)=>{
-    try {
-        console.log("Doctor JWT:", req.doctorHeader._id);
 
-        const pacientes = await Paciente.find({ estadoMascota: true, doctor: req.doctorHeader._id }).select("-nuevoPaciente -createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
-        res.status(200).json(pacientes)
+    try {
+        if (req.pacienteHeader?.rol ==="paciente"){
+            const pacientes = await Paciente.find(req.pacienteHeader._id).select("-salida -createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
+            res.status(200).json(pacientes)
+        }
+        else{
+            const pacientes = await Paciente.find({ estadoMascota: true, doctor: req.doctorHeader?._id }).select("-salida -createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
+            res.status(200).json(pacientes)
+        }
 
     } catch (error) {
         console.error(error)
@@ -136,6 +141,27 @@ const loginPropietario = async(req,res)=>{
     }
 }
 
+const perfilPropietario = (req, res) => {
+
+    try {
+        const{_id, rol,nombrePropietario,cedulaPropietario,emailPropietario,celularPropietario,nombreMascota} = req.pacienteHeader
+
+        res.status(200).json({
+            _id,
+            rol,
+            nombrePropietario,
+            cedulaPropietario,
+            emailPropietario,
+            celularPropietario,
+            nombreMascota,
+        })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
 
 export{
     registrarPaciente,
@@ -143,5 +169,6 @@ export{
     detallePaciente,
     eliminarPaciente,
     actualizarPaciente,
-    loginPropietario
+    loginPropietario,
+    perfilPropietario
 }
