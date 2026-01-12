@@ -82,6 +82,10 @@ const pacienteSchema = new Schema({
     doctor:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Doctor'
+    },
+    tratamientos:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Tratamientos'
     }
 },{
     timestamps:true

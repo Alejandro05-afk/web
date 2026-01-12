@@ -7,7 +7,7 @@ import fileUpload from "express-fileupload"
 
 import routerDoctor from './routers/doctor_routes.js';
 import routerPacientes from './routers/paciente_routers.js';
-
+import routerTratamientos from './routers/tratamiento_routes.js'
 
 
 // Inicializaciones
@@ -38,6 +38,7 @@ app.set('port',process.env.PORT || 3000)
 app.get('/',(req,res)=> res.send("Server on"))
 app.use('/api',routerDoctor)
 app.use(`/api`,routerPacientes)
+app.use(`/api`,routerTratamientos)
 app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
 
 

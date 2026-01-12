@@ -3,6 +3,7 @@ import Doctor from "../models/Doctor.js"
 import Paciente from "../models/Paciente.js"
 
 
+
 /**
  * Crear token JWT
  * @param {string} id - ID del usuario
