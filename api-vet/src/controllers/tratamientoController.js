@@ -31,6 +31,7 @@ const eliminarTratamiento = async(req,res) => {
     }
 }
 
+
 export{
     registrarTratamiento,
     eliminarTratamiento

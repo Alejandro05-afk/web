@@ -83,10 +83,10 @@ const pacienteSchema = new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Doctor'
     },
-    tratamientos:{
+    tratamientos:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Tratamientos'
-    }
+        ref:'Tratamiento'
+    }]
 },{
     timestamps:true
 })

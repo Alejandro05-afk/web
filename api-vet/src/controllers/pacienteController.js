@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import { v2 as cloudinary } from 'cloudinary'
 import fs from "fs-extra"
 import { crearTokenJWT } from "../middlewares/JWT.js";
+import Tratamiento from "../models/Tratamiento.js";
 
 
 const registrarPaciente = async(req,res)=>{
@@ -77,6 +78,10 @@ const detallePaciente = async(req,res)=>{
         const {id} = req.params
         if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:`No existe el doctor ${id}`});
         const paciente = await Paciente.findById(id).select("-createdAt -updatedAt -__v").populate('doctor','_id nombre apellido')
+
+        const tratamientos = await Tratamiento.find().where('paciente').equals(id)
+        paciente.tratamientos = tratamientos
+
         res.status(200).json(paciente)
         
     } catch (error) {
@@ -135,6 +140,7 @@ const loginPropietario = async(req,res)=>{
             rol,
             _id
         })
+
     } catch (error) {
         console.error(error)
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
